@@ -1,12 +1,15 @@
 local Game = require("game")
 local intro = require("intro")
 local joining = require("joining")
+local playmenu = require("playmenu")
 
 local game_state = "intro"
 
 function love.load()
     if game_state == "intro" then
         intro.load()
+    elseif game_state == "playmenu" then
+        playmenu.load()
     end
 end
 
@@ -17,6 +20,8 @@ function love.update(dt)
         intro.update(dt)
     elseif game_state == "joining" then
         joining.update(dt)
+    elseif game_state == "playmenu" then
+        playmenu.update(dt)
     end
 end
 
@@ -27,6 +32,8 @@ function love.draw()
         intro.draw()
     elseif game_state == "joining" then
         joining.draw()
+    elseif game_state == "playmenu" then
+        playmenu.draw()
     end
 end
 
@@ -35,6 +42,8 @@ function love.keypressed(key)
         Game.keypressed(key)
     elseif game_state == "intro" then
         intro.keypressed(key)
+    elseif game_state == "playmenu" then
+        playmenu.keypressed(key)
     end
 end
 
@@ -44,12 +53,17 @@ function love.mousepressed(x, y, button)
     end
 end
 
-function goToGame()
-    Game.load()
+function goToGame(song)
+    Game.start(song)
     game_state = "game"
 end
 
 function gotoJoining()
     joining.load()
     game_state = "joining"
+end
+
+function goToPlayMenu()
+    playmenu.load()
+    game_state = "playmenu"
 end
