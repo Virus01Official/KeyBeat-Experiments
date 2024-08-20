@@ -1,37 +1,50 @@
 local playmenu = {}
 local Game = require("game")
 
+local PollLink = "https://forms.gle/JQ8g22Js2eUqfx7b6"
+
+local LinkText = "Feedback"
+local LinkX, LinkY = 0, love.graphics.getHeight() - 30
+local LinkWidth, LinkHeight = 0, 0
+
 -- Table to hold available songs
 local songFiles = {}
 
 -- Function to add a song to the songFiles table
-local function addSong(name, midiPath, musicPath)
-    table.insert(songFiles, {name = name, midi = midiPath, music = musicPath})
+local function addSong(name, osuPath, musicPath)
+    table.insert(songFiles, {name = name, osu = osuPath, music = musicPath})
 end
 
 -- Function to load all songs from a directory
-local function loadSongsFromDirectory(midiDir, musicDir)
-    local midiFiles = love.filesystem.getDirectoryItems(midiDir)
+local function loadSongsFromDirectory(osuDir, musicDir)
+    local osuFiles = love.filesystem.getDirectoryItems(osuDir)
     local musicFiles = love.filesystem.getDirectoryItems(musicDir)
 
-    for _, midiFile in ipairs(midiFiles) do
-        local midiName = midiFile:gsub("%.json$", "")
-        local musicFile = midiName .. ".ogg"
+    for _, osuFile in ipairs(osuFiles) do
+        local osuName = osuFile:gsub("%.osu$", "")
         
-        if love.filesystem.getInfo(musicDir .. "/" .. musicFile) then
-            addSong(midiName, midiDir .. "/" .. midiFile, musicDir .. "/" .. musicFile)
+        -- Check for both .ogg and .mp3 files
+        local musicFileOgg = osuName .. ".ogg"
+        local musicFileMp3 = osuName .. ".mp3"
+
+        if love.filesystem.getInfo(musicDir .. "/" .. musicFileOgg) then
+            addSong(osuName, osuDir .. "/" .. osuFile, musicDir .. "/" .. musicFileOgg)
+        elseif love.filesystem.getInfo(musicDir .. "/" .. musicFileMp3) then
+            addSong(osuName, osuDir .. "/" .. osuFile, musicDir .. "/" .. musicFileMp3)
         end
     end
 end
 
 -- Load all songs
-loadSongsFromDirectory("assets/midi", "assets/music")
+loadSongsFromDirectory("assets/osu", "assets/music")
 
 local currentSongIndex = 1
 
 -- Function to load resources for the play menu (if needed)
 function playmenu.load()
-    -- Any initialization for the play menu
+    -- Measure the text width and height for the Link
+    LinkWidth = love.graphics.getFont():getWidth(LinkText)
+    LinkHeight = love.graphics.getFont():getHeight()
 end
 
 function playmenu.update(dt)
@@ -54,6 +67,8 @@ function playmenu.draw()
         end
     end
 
+    love.graphics.setColor(0, 0, 1)
+    love.graphics.print(LinkText, LinkX, LinkY)
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("Use UP and DOWN arrows to navigate, ENTER to select", love.graphics.getWidth() / 2 - 150, love.graphics.getHeight() - 30)
 end
@@ -67,6 +82,15 @@ function playmenu.keypressed(key)
     elseif key == "return" then
         local selectedSong = songFiles[currentSongIndex]
         goToGame(selectedSong)
+    end
+end
+
+function playmenu.mousepressed(x, y, button)
+    if button == 1 then
+        -- Check if the click was within the Link's bounding box
+        if x >= LinkX and x <= LinkX + LinkWidth and y >= LinkY and y <= LinkY + LinkHeight then
+            love.system.openURL(PollLink)
+        end
     end
 end
 
