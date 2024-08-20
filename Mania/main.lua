@@ -4,6 +4,7 @@ local joining = require("joining")
 local playmenu = require("playmenu")
 
 local game_state = "intro"
+local cursor = love.mouse.newCursor("assets/cursor.png", 0, 0)
 
 function love.load()
     if game_state == "intro" then
@@ -50,6 +51,8 @@ end
 function love.mousepressed(x, y, button)
     if game_state == "joining" then
         joining.mousepressed(x, y, button)
+    elseif game_state == "playmenu" then
+        playmenu.mousepressed(x, y, button)
     end
 end
 
@@ -66,4 +69,5 @@ end
 function goToPlayMenu()
     playmenu.load()
     game_state = "playmenu"
+    love.mouse.setCursor(cursor)
 end
